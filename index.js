@@ -47,16 +47,19 @@ var execBuild = function(base, tag, options) {
     process.exit();
   }
   var ctrId = info.stdout.trim();
+  execSync.run("docker logs -f " + ctrId);
+  
+  var interrupted = false;
   var cleanup = function() {
+    interrupted = true;
     execSync.run("docker kill " + ctrId);
     execSync.run("docker rm "+ ctrId);
     process.exit();
   };
-  
   process.on('SIGINT', cleanup);
-  execSync.run("docker logs -f " + ctrId);
+  
   var codeInfo = execSync.exec("docker wait " + ctrId);
-  if (parseInt(codeInfo.stdout.trim())) {
+  if (parseInt(codeInfo.stdout.trim()) || interrupted) {
     console.log("Build failed, not tagging image.");
     process.exit();
   }
