@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+
+var usage = "Dockerflow: Simple Ansible-based Docker development flow \n\
+\n\
+Usage: dockerflow path action\n\
+\n\
+Available actions are:\n\
+  - build: Builds the image from the base image.\n\
+  - rebuild: Builds the image from the current image.\n\
+  - debug-build: Attempts to build the image from the base image, and leaves you in a shell\n\
+    inside the container when the build completes.\n\
+  - debug-rebuild: Attempts to build the image from the current image, and leaves you in a shell\n\
+    inside the container when the build completes.\n\
+\n\
+See the README for the config file format.\n\
+\n\
+NOTE: Ansible must be installed in the base image.\n\
+"
+
+var argv = require('minimist')(process.argv.slice(2));
+var path = require('path');
+
+var action = argv['_'][0];
+var buildPath = path.resolve(process.cwd(), argv['_'][1]);
+
+var actions = {
+  build: true,
+  rebuild: true,
+  "debug-build": true,
+  "debug-rebuild": true
+}
+if (!actions[action]) {
+  throw new Error("Action " + action + " not known.")
+}
+
+require('../index')[action](buildPath);

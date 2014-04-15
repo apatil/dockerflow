@@ -1,0 +1,32 @@
+{
+  "name": "dockerflow",
+  "version": "0.0.1",
+  "description": "Simple Ansible-based Docker development flow",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apatil/dockerflow"
+  },
+  "keywords": [
+    "docker",
+    "ansible",
+    "devops"
+  ],
+  "author": "Anand Patil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/apatil/dockerflow/issues"
+  },
+  "homepage": "https://github.com/apatil/dockerflow",
+  "dependencies": {
+    "minimist": "0.0.8",
+    "js-yaml": "^3.0.2",
+    "execSync": "^1.0.1-pre"
+  },
+  "bin": {
+    "dockerflow": "bin/dockerflow"
+  }
+}
