@@ -2,6 +2,25 @@
 
 Smooth and simple [Docker](http://docker.io) image development with [Ansible](http://www.ansible.com/home). Small configuration changes result in quick incremental updates of development images.
 
+To build an image from scratch:
+
+```
+dockerflow build .
+```
+
+To make an incremental change to an image:
+
+```
+dockerflow rebuild .
+```
+
+To drop into an interactive shell inside the container when the build fails:
+
+```
+dockerflow debug-build .
+```
+
+
 ## Why?
 
 Existing Docker build systems don't support my preferred development workflow, which has four actions:
