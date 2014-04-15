@@ -68,3 +68,5 @@ The playbook should define the following [variables](http://docs.ansible.com/pla
 - dockerflow-environment (optional): A space-separated list of environmental variables to forward into the container. You can access environmental from playbooks using [this method](http://docs.ansible.com/faq.html#how-do-i-access-shell-environment-variables) or [this method](https://groups.google.com/forum/#!msg/ansible-project/e0erq3FLR5I/vzXm3R8c0BEJ).
 
 Alternatively, these options can be set using command line options `--base`, `--tag`, `--docker-options` and `--environment`. Command line options override config file options. Note that if you override `--base`, there is no difference between the build and rebuild actions.
+
+If your Docker daemon is running on a nonstandard socket, you can pass the `-H` or `--host` argument.

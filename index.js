@@ -21,26 +21,33 @@ var readConfig = function(buildPath, opts) {
     var k = envKeys[i];
     envOpts.push("-e " + k + "=$" + k);
   }
-
+  
+  var host = opts.H || opts.host;
+  if (host) {
+    host = "-H " + host;
+  } else {
+    host = ""
+  }
   return {
+    host:  host,
     base: opts["base"] || vars["dockerflow-base"],
     tag: opts["tag"] || vars["dockerflow-tag"],
     dockerOptions: "-v " + buildPath + ":/dockerflow:ro " + envOpts.join(" ") + " " + (opts["docker-options"] || vars["dockerflow-docker-options"] || "")
   };
 };
 
-var execDebugBuild = function(base, tag, options) {
+var execDebugBuild = function(opts) {
   var ctrCmd = " /bin/bash -c \"/bin/bash  --rcfile <(echo 'ansible-playbook /dockerflow/dockerflow.yml -c local -i \\\"127.0.0.1,\\\"')\"";
   console.log("Dropping you into the debug container. Build will begin immediately.");
-  var runCmd = "docker run -i -t --rm " + options + " " + base + " " + ctrCmd;
+  var runCmd = "docker " + opts.host + " run -i -t --rm " + opts.dockerOptions + " " +opts.base + " " + ctrCmd;
   var cp = execSync.run(runCmd);
   console.log("Not tagging image in debug mode.");
 };
 
-var execBuild = function(base, tag, options) {
+var execBuild = function(opts) {
   var ctrCmd = "ansible-playbook /dockerflow/dockerflow.yml -c local -i \"127.0.0.1,\"";
   
-  var runCmd = "docker run -i -t -d " + options + " " + base + " " + ctrCmd;
+  var runCmd = "docker " + opts.host + " run -i -t -d " + opts.dockerOptions + " " + opts.base + " " + ctrCmd;
   var info = execSync.exec(runCmd);
   if (info.code) {
     console.log("Unable to start container, code " + info.code + ": " + info.stdout);
@@ -70,26 +77,28 @@ var execBuild = function(base, tag, options) {
   info = execSync.exec("docker commit " + ctrId);
   var imgId = info.stdout.trim();
   console.log("Image id is ", imgId);
-  execSync.exec("docker tag " + imgId + " " + tag);
+  execSync.exec("docker tag " + imgId + " " + opts.tag);
   cleanup();
 };
 
 var build = exports.build = function build(buildPath, opts) {
   var imgs = readConfig(buildPath, opts);
-  execBuild(imgs.base, imgs.tag, imgs.dockerOptions);
+  execBuild(imgs);
 };
 
 var rebuild = exports.rebuild = function rebuild(buildPath, opts) {
   var imgs = readConfig(buildPath, opts);
-  execBuild(imgs.tag, imgs.tag, imgs.dockerOptions);
+  imgs.base = imgs.tag;
+  execBuild(imgs);
 };
 
 var debugBuild = exports["debug-build"] = function debugBuild(buildPath, opts) {
   var imgs = readConfig(buildPath, opts);
-  execDebugBuild(imgs.base, imgs.tag, imgs.dockerOptions);
+  execDebugBuild(imgs);
 };
 
 var debugRebuild = exports["debug-rebuild"] = function debugRebuild(buildPath, opts) {
   var imgs = readConfig(buildPath, opts);
-  execDebugBuild(imgs.tag, imgs.tag, imgs.dockerOptions);
+  imgs.base = imgs.tag;
+  execDebugBuild(imgs);
 }
