@@ -24,7 +24,7 @@ var readConfig = function(buildPath) {
   return {
     base: vars["dockerflow-base"],
     tag: vars["dockerflow-tag"],
-    dockerOptions: "-v " + buildPath + ":/dockerflow " + envOpts.join(" ") + " " + (vars["dockerflow-docker-options"] || "")
+    dockerOptions: "-v " + buildPath + ":/dockerflow:ro " + envOpts.join(" ") + " " + (vars["dockerflow-docker-options"] || "")
   };
 };
 
