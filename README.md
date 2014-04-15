@@ -56,10 +56,15 @@ Install [Node.js](http://nodejs.org), then `sudo npm install -g dockerflow`.
 
 ## Usage
 
-`dockerflow action path`, where action can be build, rebuild, debug-build or debug-rebuild.
+`dockerflow action path [options]`, where action can be build, rebuild, debug-build or debug-rebuild.
 
 In more or less the spirit of Dockerfiles, the given path should contain an Ansible playbook called 'dockerflow.yml' which specifies the configuration. In addition, the given path will be available inside the container read-only at `/dockerflow` during the build, but will not be bundled into the image.
 
-The playbook must define the [variables](http://docs.ansible.com/playbooks_variables.html#variables-defined-in-a-playbook) `dockerflow-base`, which gives the id or tag of the image from which the build should start, and `dockerflow-tag`, which gives the tag that will be applied to the output image.
+The playbook should define the following [variables](http://docs.ansible.com/playbooks_variables.html#variables-defined-in-a-playbook):
 
-It may optionally define `dockerflow-docker-options`, which can be an arbitrary string of options to pass to the Docker daemon, and `dockerflow-environment`, which is a space-separated list of environmental variables to forward into the container. You can access environmental from playbooks using [this method](http://docs.ansible.com/faq.html#how-do-i-access-shell-environment-variables) or [this method](https://groups.google.com/forum/#!msg/ansible-project/e0erq3FLR5I/vzXm3R8c0BEJ).
+- dockerflow-base: The id or tag of the image from which the build should start.
+- dockerflow-tag: The tag that will be applied to the output image.
+- dockerflow-docker-options (optional): An arbitrary string of options to pass to the Docker client.
+- dockerflow-environment (optional): A space-separated list of environmental variables to forward into the container. You can access environmental from playbooks using [this method](http://docs.ansible.com/faq.html#how-do-i-access-shell-environment-variables) or [this method](https://groups.google.com/forum/#!msg/ansible-project/e0erq3FLR5I/vzXm3R8c0BEJ).
+
+Alternatively, these options can be set using command line options `--base`, `--tag`, `--docker-options` and `--environment`. Command line options override config file options.

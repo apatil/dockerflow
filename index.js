@@ -3,7 +3,7 @@ var yaml = require('js-yaml');
 var path = require('path');
 var execSync = require('execSync');
 
-var readConfig = function(buildPath) {
+var readConfig = function(buildPath, opts) {
   var playbookPath = path.join(buildPath, 'dockerflow.yml');
   if (!fs.existsSync(playbookPath)) {
     throw new Error("dockerflow.yml not found in " + buildPath);
@@ -11,8 +11,9 @@ var readConfig = function(buildPath) {
   var playbookYml = yaml.safeLoad(fs.readFileSync(playbookPath, 'utf8'));
   var vars = playbookYml[0].vars;
 
+  var envSpec = opts["environment"] || vars["dockerflow-environment"];
   var envKeys = [];
-  if (vars["dockerflow-environment"]) {
+  if () {
     envKeys = vars["dockerflow-environment"].split(" ");
   }
   var envOpts = [];
@@ -22,9 +23,9 @@ var readConfig = function(buildPath) {
   }
 
   return {
-    base: vars["dockerflow-base"],
-    tag: vars["dockerflow-tag"],
-    dockerOptions: "-v " + buildPath + ":/dockerflow:ro " + envOpts.join(" ") + " " + (vars["dockerflow-docker-options"] || "")
+    base: opts["base"] || vars["dockerflow-base"],
+    tag: opts["tag"] || vars["dockerflow-tag"],
+    dockerOptions: "-v " + buildPath + ":/dockerflow:ro " + envOpts.join(" ") + " " + (opts["docker-options"] || vars["dockerflow-docker-options"] || "")
   };
 };
 
@@ -67,22 +68,22 @@ var execBuild = function(base, tag, options) {
   cleanup();
 };
 
-var build = exports.build = function build(buildPath) {
-  var imgs = readConfig(buildPath);
+var build = exports.build = function build(buildPath, opts) {
+  var imgs = readConfig(buildPath, opts);
   execBuild(imgs.base, imgs.tag, imgs.dockerOptions);
 };
 
-var rebuild = exports.rebuild = function rebuild(buildPath) {
-  var imgs = readConfig(buildPath);
+var rebuild = exports.rebuild = function rebuild(buildPath, opts) {
+  var imgs = readConfig(buildPath, opts);
   execBuild(imgs.tag, imgs.tag, imgs.dockerOptions);
 };
 
-var debugBuild = exports["debug-build"] = function debugBuild(buildPath) {
-  var imgs = readConfig(buildPath);
+var debugBuild = exports["debug-build"] = function debugBuild(buildPath, opts) {
+  var imgs = readConfig(buildPath, opts);
   execDebugBuild(imgs.base, imgs.tag, imgs.dockerOptions);
 };
 
-var debugRebuild = exports["debug-rebuild"] = function debugRebuild(buildPath) {
-  var imgs = readConfig(buildPath);
+var debugRebuild = exports["debug-rebuild"] = function debugRebuild(buildPath, opts) {
+  var imgs = readConfig(buildPath, opts);
   execDebugBuild(imgs.tag, imgs.tag, imgs.dockerOptions);
 }

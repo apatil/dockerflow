@@ -2,7 +2,7 @@
 
 var usage = "Dockerflow: Smooth and simple Docker image development with Ansible.\n\
 \n\
-Usage: dockerflow path action\n\
+Usage: dockerflow path action [options]\n\
 \n\
 Available actions are:\n\
   - build: Builds the image from the base image.\n\
@@ -12,7 +12,13 @@ Available actions are:\n\
   - debug-rebuild: Attempts to build the image from the current image, and leaves you in a shell\n\
     inside the container when the build completes.\n\
 \n\
-See the README for the config file format.\n\
+Options override their corresponding entries in the dockerflow file (see README):\n\
+  - --tag: The tag to apply to the built image.\n\
+  - --base: The hash or tag of the image from which the build should start.\n\
+  - --docker-options: Options to pass directly to Docker.\n\
+  - --environment: A space-separated list of environmental valiables to forward into the container.\n\
+\n\
+See the README for the dockerflow file format.\n\
 \n\
 NOTE: Ansible must be installed in the base image.\n\
 "
@@ -33,4 +39,4 @@ if (!actions[action]) {
   throw new Error("Action " + action + " not known.")
 }
 
-require('../index')[action](buildPath);
+require('../index')[action](buildPath, argv);
