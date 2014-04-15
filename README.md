@@ -8,7 +8,7 @@ To build an image from scratch:
 dockerflow build .
 ```
 
-To make an incremental change to an image:
+To rebuild the image incrementally after changing the playbook:
 
 ```
 dockerflow rebuild .
