@@ -13,8 +13,8 @@ var readConfig = function(buildPath, opts) {
 
   var envSpec = opts["environment"] || vars["dockerflow-environment"];
   var envKeys = [];
-  if () {
-    envKeys = vars["dockerflow-environment"].split(" ");
+  if (envSpec) {
+    envKeys = envSpec.split(" ");
   }
   var envOpts = [];
   for (var i = 0; i < envKeys.length; i++) {
