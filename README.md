@@ -31,6 +31,10 @@ If you also like Ansible but care about sticking with Dockerfiles more than 'reb
 
 I don't want the output to be complete tarballs of images, but tagged Docker images that I can push. Also, I want an easy incremental option.
 
+## Installation
+
+Install [Node.js](http://nodejs.org), then `sudo npm install -g dockerflow`.
+
 ## Usage
 
 `dockerflow action path`, where action can be build, rebuild, debug-build or debug-rebuild.
