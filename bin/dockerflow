@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var usage = "Dockerflow: Simple Ansible-based Docker development flow \n\
+var usage = "Dockerflow: Smooth and simple Docker image development with Ansible.\n\
 \n\
 Usage: dockerflow path action\n\
 \n\

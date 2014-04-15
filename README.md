@@ -1,6 +1,6 @@
 # Dockerflow
 
-Simple ansible-based development flow for [Docker](http://docker.io). Small configuration changes result in quick incremental updates of development images.
+Smooth and simple [Docker](http://docker.io) image development with [Ansible](http://www.ansible.com/home). Small configuration changes result in quick incremental updates of development images.
 
 ## Why?
 

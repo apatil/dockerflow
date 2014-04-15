@@ -1,7 +1,7 @@
 {
   "name": "dockerflow",
   "version": "0.0.1",
-  "description": "Simple Ansible-based Docker development flow",
+  "description": "Smooth and simple Docker image development with Ansible.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
