@@ -12,8 +12,8 @@ var readConfig = function(buildPath) {
   var vars = playbookYml[0].vars;
 
   var envKeys = [];
-  if (vars["dockerflow-env"]) {
-    envKeys = vars["dockerflow-env"].split(" ");
+  if (vars["dockerflow-environment"]) {
+    envKeys = vars["dockerflow-environment"].split(" ");
   }
   var envOpts = [];
   for (var i = 0; i < envKeys.length; i++) {
