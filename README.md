@@ -8,13 +8,13 @@ To build an image from scratch:
 dockerflow build .
 ```
 
-To rebuild the image incrementally after changing the playbook:
+To rebuild the image incrementally after changing a playbook or file:
 
 ```
 dockerflow rebuild .
 ```
 
-To drop into an interactive shell inside the container when the build fails:
+To drop into a shell inside the container when the build fails so you can figure out what happened interactively:
 
 ```
 dockerflow debug-build .
