@@ -25,6 +25,8 @@ If you remember that the subsequent steps also require `apt-get install w`, you 
 
 Also, I like Ansible's declarative approach to configuration better than Dockerfiles' imperative one.
 
+If you also like Ansible but care about sticking with Dockerfiles more than 'rebuild', check [this](http://www.ansible.com/blog/2014/02/12/installing-and-building-docker-with-ansible) out.
+
 ### Why not [Packer](http://packer.io)?
 
 I don't want the output to be complete tarballs of images, but tagged Docker images that I can push. Also, I want an easy incremental option.
