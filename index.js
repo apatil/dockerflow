@@ -47,27 +47,30 @@ var execBuild = function(base, tag, options) {
     process.exit();
   }
   var ctrId = info.stdout.trim();
-  execSync.run("docker logs -f " + ctrId);
   
   var interrupted = false;
   var cleanup = function() {
+    process.removeListener('SIGINT', cleanup);
     interrupted = true;
-    execSync.run("docker kill " + ctrId);
-    execSync.run("docker rm "+ ctrId);
+    console.log("Cleaning up.")
+    execSync.exec("docker kill " + ctrId);
+    execSync.exec("docker rm "+ ctrId);
     process.exit();
   };
   process.on('SIGINT', cleanup);
   
-  var codeInfo = execSync.exec("docker wait " + ctrId);
-  if (parseInt(codeInfo.stdout.trim()) || interrupted) {
-    console.log("Build failed, not tagging image.");
-    process.exit();
+  var exitCode = execSync.run("docker logs -f " + ctrId);
+  
+  execSync.exec("docker wait " + ctrId);
+  if (exitCode || interrupted) {
+    console.log("Build failed or interrupted, not tagging image.");
+    cleanup();
   }
   console.log("Build completed successfully, committing and tagging image.");
   info = execSync.exec("docker commit " + ctrId);
   var imgId = info.stdout.trim();
-  execSync.run("docker tag " + imgId + " " + tag);
-  process.removeListener('SIGINT', cleanup);
+  console.log("Image id is ", imgId);
+  execSync.exec("docker tag " + imgId + " " + tag);
   cleanup();
 };
 
