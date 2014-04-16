@@ -86,8 +86,8 @@ var execDebugBuild = function(opts) {
     ].join("\n");
     fs.writeFileSync(rcFilePath, rcFileContents);
     
-    var extraMounts = "-v " + ctrIdPath + ":/tmp/dockerflow-ctrId" + " -v " + rcFilePath + ":/tmp/dockerflow-command";
-    var ctrCmd = "/bin/bash -c '/bin/bash --rcfile /tmp/dockerflow-command'";
+    var extraMounts = "-v " + ctrIdPath + ":/tmp/dockerflow-ctrId" + " -v " + rcFilePath + ":/tmp/dockerflow-commands";
+    var ctrCmd = "/bin/bash -c '/bin/bash --rcfile /tmp/dockerflow-commands'";
     console.log("Dropping you into the debug container. Build will begin immediately.");
     var runCmd = ["docker", opts.host, "run -i -t", extraMounts, opts.dockerOptions, opts.base, ctrCmd].join(" ");
     
@@ -95,11 +95,10 @@ var execDebugBuild = function(opts) {
     
     var ctrId = fs.readFileSync(ctrIdPath).toString().trim();
     
-    ask("Do you want to commit and tag this image? (default: no)", function(err, answer) {
+    ask("Commit and tag this image? (default: no)", function(err, answer) {
       if (err) {
         throw err;
       }
-      console.log(answer);
       if (yesses[answer.trim()]) {
         commitAndTag(ctrId, opts.tag);
       } else {
