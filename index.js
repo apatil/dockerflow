@@ -2,6 +2,9 @@ var fs = require('fs');
 var yaml = require('js-yaml');
 var path = require('path');
 var execSync = require('execSync');
+var tmp = require('tmp');
+var rl = require('readline');
+var path = require('path');
 
 var readConfig = function(buildPath, opts) {
   var playbookPath = path.join(buildPath, 'dockerflow.yml');
@@ -36,49 +39,102 @@ var readConfig = function(buildPath, opts) {
   };
 };
 
+var cleanup = function(ctrId) {
+  console.log("Cleaning up.")
+  execSync.exec("docker kill " + ctrId);
+  execSync.exec("docker rm "+ ctrId);
+  process.exit();
+};
+
+var commitAndTag = function(ctrId, tag) {
+  console.log("Committing and tagging image.");
+  var info = execSync.exec("docker commit " + ctrId);
+  var imgId = info.stdout.trim();
+  console.log("Image id is ", imgId);
+  execSync.exec("docker tag " + imgId + " " + tag);
+  cleanup(ctrId);
+};
+
+// Cribbed from https://coderwall.com/p/v16yja
+var ask = function(question, callback) {
+  var r = rl.createInterface({
+    input: process.stdin,
+    output: process.stdout});
+  r.question(question + ' ', function(answer) {
+    r.close();
+    callback(null, answer);
+  });
+};
+
+var yesses = {y: true, Y: true, yes: true, Yes: true, YES: true}
+
 var execDebugBuild = function(opts) {
-  var ctrCmd = " /bin/bash -c \"/bin/bash  --rcfile <(echo 'ansible-playbook /dockerflow/dockerflow.yml -c local -i \\\"127.0.0.1,\\\"')\"";
-  console.log("Dropping you into the debug container. Build will begin immediately.");
-  var runCmd = "docker " + opts.host + " run -i -t --rm " + opts.dockerOptions + " " +opts.base + " " + ctrCmd;
-  var cp = execSync.run(runCmd);
-  console.log("Not tagging image in debug mode.");
+  tmp.dir(function(err, dirPath) {
+    if (err) {
+      throw err;
+    }
+    
+    var ctrIdPath = path.join(dirPath, "ctrId");
+    fs.writeFileSync(ctrIdPath, "");
+
+    var rcFilePath = path.join(dirPath, "rcFile");
+    var ansibleCmd = 'ansible-playbook /dockerflow/dockerflow.yml -c local -i "127.0.0.1,"';
+    var rcFileContents = [
+      "echo $HOSTNAME > /tmp/dockerflow-ctrId",
+      "history -s '" + ansibleCmd + "'",
+      ansibleCmd
+    ].join("\n");
+    fs.writeFileSync(rcFilePath, rcFileContents);
+    
+    var extraMounts = "-v " + ctrIdPath + ":/tmp/dockerflow-ctrId" + " -v " + rcFilePath + ":/tmp/dockerflow-command";
+    var ctrCmd = "/bin/bash -c '/bin/bash --rcfile /tmp/dockerflow-command'";
+    console.log("Dropping you into the debug container. Build will begin immediately.");
+    var runCmd = ["docker", opts.host, "run -i -t", extraMounts, opts.dockerOptions, opts.base, ctrCmd].join(" ");
+    
+    execSync.run(runCmd);
+    
+    var ctrId = fs.readFileSync(ctrIdPath).toString().trim();
+    
+    ask("Do you want to commit and tag this image? (default: no)", function(err, answer) {
+      if (err) {
+        throw err;
+      }
+      console.log(answer);
+      if (yesses[answer.trim()]) {
+        commitAndTag(ctrId, opts.tag);
+      } else {
+        cleanup(ctrId);
+      }
+    });
+  });
 };
 
 var execBuild = function(opts) {
   var ctrCmd = "ansible-playbook /dockerflow/dockerflow.yml -c local -i \"127.0.0.1,\"";
   
-  var runCmd = "docker " + opts.host + " run -i -t -d " + opts.dockerOptions + " " + opts.base + " " + ctrCmd;
+  var runCmd = ["docker", opts.host, "run -i -t -d", opts.dockerOptions, opts.base, ctrCmd].join(" ");
   var info = execSync.exec(runCmd);
   if (info.code) {
     console.log("Unable to start container, code " + info.code + ": " + info.stdout);
     process.exit();
   }
   var ctrId = info.stdout.trim();
-  
+
   var interrupted = false;
-  var cleanup = function() {
-    process.removeListener('SIGINT', cleanup);
+  process.on('SIGINT', function() {
     interrupted = true;
-    console.log("Cleaning up.")
-    execSync.exec("docker kill " + ctrId);
-    execSync.exec("docker rm "+ ctrId);
-    process.exit();
-  };
-  process.on('SIGINT', cleanup);
+    cleanup(ctrId);
+  });
   
   execSync.run("docker logs -f " + ctrId);
   
   var exitCode = execSync.run("docker wait " + ctrId);
   if (exitCode || interrupted) {
     console.log("Build failed or interrupted, not tagging image.");
-    cleanup();
+    cleanup(ctrId);
   }
-  console.log("Build completed successfully, committing and tagging image.");
-  info = execSync.exec("docker commit " + ctrId);
-  var imgId = info.stdout.trim();
-  console.log("Image id is ", imgId);
-  execSync.exec("docker tag " + imgId + " " + opts.tag);
-  cleanup();
+  console.log("Build completed successfully.");
+  commitAndTag(ctrId, opts.tag)
 };
 
 var build = exports.build = function build(buildPath, opts) {
