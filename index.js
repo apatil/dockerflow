@@ -66,9 +66,10 @@ var execBuild = function(opts) {
   };
   process.on('SIGINT', cleanup);
   
-  var exitCode = execSync.run("docker logs -f " + ctrId);
+  execSync.run("docker logs -f " + ctrId);
   
-  execSync.exec("docker wait " + ctrId);
+  var exitCode = execSync.exec("docker wait " + ctrId);
+  
   if (exitCode || interrupted) {
     console.log("Build failed or interrupted, not tagging image.");
     cleanup();
