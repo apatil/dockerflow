@@ -49,7 +49,12 @@ var cleanup = function(ctrId) {
 
 var commitAndTag = function(ctrId, opts) {
   console.log("Committing and tagging image.");
-  var info = execSync.exec("docker commit --run=#{opts.command} " + ctrId);
+  if (opts.command) {
+    cmdPart = "--run=" + JSON.stringify({Cmd: opts.command.split(" ")});
+  } else {
+    cmdPart = ""
+  }
+  var info = execSync.exec("docker commit " + cmdPart + " " + ctrId);
   var imgId = info.stdout.trim();
   console.log("Image id is ", imgId);
   execSync.exec("docker tag " + imgId + " " + opts.tag);
