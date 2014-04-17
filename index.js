@@ -35,6 +35,7 @@ var readConfig = function(buildPath, opts) {
     host:  host,
     base: opts["base"] || vars["dockerflow-base"],
     tag: opts["tag"] || vars["dockerflow-tag"],
+    command: opts["command"] || vars["dockerflow-command"],
     dockerOptions: "-v " + buildPath + ":/dockerflow:ro " + envOpts.join(" ") + " " + (opts["docker-options"] || vars["dockerflow-docker-options"] || "")
   };
 };
@@ -46,12 +47,12 @@ var cleanup = function(ctrId) {
   process.exit();
 };
 
-var commitAndTag = function(ctrId, tag) {
+var commitAndTag = function(ctrId, opts) {
   console.log("Committing and tagging image.");
-  var info = execSync.exec("docker commit " + ctrId);
+  var info = execSync.exec("docker commit --run=#{opts.command} " + ctrId);
   var imgId = info.stdout.trim();
   console.log("Image id is ", imgId);
-  execSync.exec("docker tag " + imgId + " " + tag);
+  execSync.exec("docker tag " + imgId + " " + opts.tag);
   cleanup(ctrId);
 };
 
@@ -100,7 +101,7 @@ var execDebugBuild = function(opts) {
         throw err;
       }
       if (yesses[answer.trim()]) {
-        commitAndTag(ctrId, opts.tag);
+        commitAndTag(ctrId, opts);
       } else {
         cleanup(ctrId);
       }
@@ -112,6 +113,7 @@ var execBuild = function(opts) {
   var ctrCmd = "ansible-playbook /dockerflow/dockerflow.yml -c local -i \"127.0.0.1,\"";
   
   var runCmd = ["docker", opts.host, "run -i -t -d", opts.dockerOptions, opts.base, ctrCmd].join(" ");
+  console.log(runCmd)
   var info = execSync.exec(runCmd);
   if (info.code) {
     console.log("Unable to start container, code " + info.code + ": " + info.stdout);
@@ -133,7 +135,7 @@ var execBuild = function(opts) {
     cleanup(ctrId);
   }
   console.log("Build completed successfully.");
-  commitAndTag(ctrId, opts.tag)
+  commitAndTag(ctrId, opts)
 };
 
 var build = exports.build = function build(buildPath, opts) {

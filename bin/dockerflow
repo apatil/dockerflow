@@ -17,6 +17,7 @@ Options override their corresponding entries in the dockerflow file (see README)
   - --base: The hash or tag of the image from which the build should start.\n\
   - --docker-options: Options to pass directly to Docker.\n\
   - --environment: A space-separated list of environmental valiables to forward into the container.\n\
+  - --command: A command for the image to run automatically on startup.\n\
 \n\
 You can also provide the -H or --host option if your Docker daemon is running on a nonstandard socket.\n\
 \n\
