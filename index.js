@@ -53,7 +53,7 @@ var commitAndTag = function(ctrId, opts) {
   } else {
     cmdPart = ""
   }
-  console.log("docker commit " + cmdPart + " " + ctrId)
+
   var info = execSync.exec("docker commit " + cmdPart + " " + ctrId);
   var imgId = info.stdout.trim();
   console.log("Image id is ", imgId);
@@ -118,7 +118,6 @@ var execBuild = function(opts) {
   var ctrCmd = "ansible-playbook /dockerflow/dockerflow.yml -c local -i \"127.0.0.1,\"";
   
   var runCmd = ["docker", opts.host, "run -i -t -d", opts.dockerOptions, opts.base, ctrCmd].join(" ");
-  console.log(runCmd)
   var info = execSync.exec(runCmd);
   if (info.code) {
     console.log("Unable to start container, code " + info.code + ": " + info.stdout);
